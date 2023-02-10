@@ -1,9 +1,9 @@
-"use client";
-import { Dialog, Transition } from '@headlessui/react'
-import React,{Fragment, useState} from 'react'
-import UserList from './UserList';
+import React, {useState, useEffect, Fragment} from 'react'
+import { Transition, Dialog, } from '@headlessui/react';
 
-const AddUser = () => {
+
+const EditUser = ({userId, editBtn, setResponseUser}) => {
+
     const  USER_API_BASE_URL="http://localhost:8080/api/v1/users";
     const [isOpen, setIsOpen] = useState(false);
     const [user, setUser] = useState({
@@ -12,64 +12,72 @@ const AddUser = () => {
         lastName:"",
         emailId:"",
     });
+ 
+    useEffect(() => {
+        const fetchData = async (id)=>{
+            try{
+                const response = await fetch(USER_API_BASE_URL+"/"+id,{
+                    method:"GET",
+                    headers:{
+                        "Content-Type":"application/json"
+                    },
+                });
+    
+                const _user= await response.json();
+                setUser(_user);
+                setIsOpen(true); 
+
+            }catch(error){
+                console.log(error);
+            }
+            
+        };
+        if(userId){
+            fetchData(userId);
+            //setEditBtn(false);
+        }
+    
+    }, [userId, editBtn])
+
+    const reset=(e)=>{
+        e.preventDefault();
+        setIsOpen(false); 
+        
+    }
+    
+
     function closeModal(){
         setIsOpen(false);
     }
     function openModal(){
         setIsOpen(true);
     }
-
-const [responseUser, setResponseUser] = useState({
-        id:"",
-        firstName:"",
-        lastName:"",
-        emailId:"",
-});
-
-const handleChange= (event)=>{
-    const value = event.target.value;
-    setUser({...user,[event.target.name]:value})
-}
-
-const saveUser= async (e) =>{
-    e.preventDefault();
-    const response = await fetch(USER_API_BASE_URL,{
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body: JSON.stringify(user),
-    });
-    if(!response.ok){
-        throw new Error("Something went wrong");
+    const handleChange = (event)=>{
+        const value = event.target.value;
+        setUser({...user,[event.target.name]:value})
     }
-    const _user= await response.json();
-    setResponseUser(_user);
-    reset(e); 
-}
 
-const reset=(e)=>{
-    e.preventDefault();
-    setUser({
-        id:"",
-        firstName:"",
-        lastName:"",
-        emailId:"",
-    });
-    setIsOpen(false); 
-}
+    const updateUser = async (e) =>{
+        e.preventDefault();
+        const response = await fetch(USER_API_BASE_URL+"/"+userId,{
+            method:"PUT",
+            headers:{
+                "Content-Type":"application/json"
+            },
+            body: JSON.stringify(user),
+        });
+        if(!response.ok){
+            throw new Error("Something went wrong");
+        }
+        const _user = await response.json();
+        setResponseUser(_user);
+        reset(e);
+    }
 
   return (
     <>
-    <div className='container mx-auto my-8'>
-        <div className='h-12'>
-            <button 
-            onClick={openModal}
-            className='rounded bg-slate-500 text-white px-6 py-2 font-semibold'>
-                Add User
-                </button>
-        </div>
-    </div>
-    <Transition appear show={isOpen} as={Fragment}>
-        <Dialog as="div" className="fixed inset-0 overflow-y-auto" onClose={closeModal}>
+         <Transition appear show={isOpen} as={Fragment}>
+            <Dialog as="div" className="fixed inset-0 overflow-y-auto" onClose={closeModal}>
             <div className='min-h-screen px-4 text-center'>
                 <Transition.Child 
                  as={Fragment}
@@ -81,7 +89,7 @@ const reset=(e)=>{
                  leaveTo="opacity-0 scale-95">
                     <div className='inline-block w-full max-w-md p-6 my-8 overflow-hidden text-left align-middle transition-all transform bg-white shadow-xl rounded-md'>
                         <Dialog.Title as="h3" className='text-large font-medium leading-6 text-gray-900 '>
-                            Add new User
+                            Update User
                             </Dialog.Title>
                             <div className='flex max-w-md max-auto'>
                                 <div className='my-2'>
@@ -117,9 +125,9 @@ const reset=(e)=>{
                                     </div>
                                     <div className='h-14 my-4 space-x-4 pt-4'>
                                         <button
-                                            onClick={saveUser}
+                                            onClick={updateUser}
                                         className='rounded text-white font-semibold bg-green-400 hover:bg-green-700 hover:cursor-pointer py-2 px-6' >
-                                            Save
+                                           Update
                                         </button>
                                         <button 
                                             onClick={reset}
@@ -134,9 +142,8 @@ const reset=(e)=>{
             </div>
         </Dialog>
     </Transition>
-    <UserList user={responseUser}></UserList>
     </>
   )
 }
 
-export default AddUser
+export default EditUser

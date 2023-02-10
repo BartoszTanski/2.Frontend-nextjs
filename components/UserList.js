@@ -1,5 +1,6 @@
 "use client";
 import React, {useState, useEffect} from 'react'
+import EditUser from './EditUser';
 import User from './User'
 
 
@@ -7,6 +8,9 @@ const UserList = ({user}) => {
     const  USER_API_BASE_URL="http://localhost:8080/api/v1/users";
     const [users, setUsers] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [userId, setUserId] = useState(null)
+    const [responseUser, setResponseUser] = useState(null)
+    const [editBtn, setEditBtn] = useState(false);
 
     useEffect(() => {
       const fetchData = async() =>{
@@ -27,7 +31,7 @@ const UserList = ({user}) => {
       }
     
       fetchData();
-    },[user]) //so it only calls once
+    },[user, responseUser]) //so it only calls once
     
     const deleteUser = (e,id)=>{
       e.preventDefault();
@@ -42,8 +46,14 @@ const UserList = ({user}) => {
       });
     };
 
+    const editUser=(e,id)=>{
+     e.preventDefault();
+       setUserId(id);
+       setEditBtn(!editBtn);
+    };
 
   return (
+    <>
     <div className='container mx-auto my-8'>
         <div className='flex shadow border-b'>
             <table className='min-w-full'>
@@ -66,7 +76,7 @@ const UserList = ({user}) => {
                 {!loading&&(
                 <tbody>
                   {users?.map((user)=>(
-                    <User user={user} key={user.id} deleteUser={deleteUser}></User>
+                    <User user={user} key={user.id} deleteUser={deleteUser} editUser={editUser}></User>
                   ))}
                   
                 </tbody>
@@ -74,6 +84,8 @@ const UserList = ({user}) => {
             </table>
         </div>
     </div>
+    <EditUser userId={userId} editBtn={editBtn}  setResponseUser={setResponseUser}/>
+    </>
   )
 }
 

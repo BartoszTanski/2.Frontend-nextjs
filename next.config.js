@@ -3,6 +3,10 @@ const nextConfig = {
   experimental: {
     appDir: true,
   },
+  images:{
+    domains: ["platform-lookaside.fbsbx.com"],
+  },
+  
 }
 
 module.exports = nextConfig
