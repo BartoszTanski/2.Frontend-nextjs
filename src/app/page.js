@@ -1,6 +1,7 @@
 import Image from 'next/image'
 import Navbar from 'components/Navbar'
 import UserList from 'components/UserList'
+import AddUser from 'components/AddUser'
 
 
 
@@ -9,7 +10,8 @@ export default function Home() {
     <div>
     <Navbar></Navbar>
     <main >
-      <UserList></UserList>
+      <AddUser></AddUser>
+     
     </main>
      </div>
   )
